@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
@@ -136,6 +137,8 @@ int net_bind_tcp(struct net_addr *shost, int reuseport)
 	struct sockaddr client_addr;
 	socklen_t client_addr_len;
 	int acfd = -1;
+	int maxseg = 128;
+	socklen_t maxseglen = sizeof(maxseg);
 	int sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sd < 0) {
 		PFATAL("socket()");
@@ -147,6 +150,20 @@ int net_bind_tcp(struct net_addr *shost, int reuseport)
 	if (r < 0) {
 		PFATAL("setsockopt(SO_REUSEADDR)");
 	}
+
+	if(getsockopt(sd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, &maxseglen)) {
+		PFATAL("getsockopt(TCP_MAXSEG)");
+	}
+	printf("TCP_MAXSEG = %d Len = %d\n", maxseg, maxseglen);
+
+	if (setsockopt(sd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, maxseglen) < 0) {
+		PFATAL("setsockopt(TCP_MAXSEG)");
+	}
+
+	if(getsockopt(sd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, &maxseglen)) {
+		PFATAL("getsockopt(TCP_MAXSEG)");
+	}
+	printf("TCP_MAXSEG = %d Len = %d\n", maxseg, maxseglen);
 
 	if (reuseport) {
 		one = 1;
