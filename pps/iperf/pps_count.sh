@@ -25,4 +25,3 @@ do
         RXPPS=`expr $R2 - $R1`
         echo "TX $1: $TXPPS pkts/s RX $1: $RXPPS pkts/s"
  done
-
