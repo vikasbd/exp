@@ -149,7 +149,7 @@ int main(int argc, const char *argv[])
 		last_pps = now_pps;
 		last_bps = now_bps;
 
-		printf("%7.3fM pps %7.3fMiB / %7.3fMb\n",
+		printf("%7.3fMpps %7.3fMiB / %7.3fMbps\n",
 		       delta_pps / 1000.0 / 1000.0,
 		       delta_bps / 1024.0 / 1024.0,
 		       delta_bps * 8.0 / 1000.0 / 1000.0 );
