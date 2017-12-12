@@ -96,6 +96,24 @@ start_sender ()
 }
 
 int
+print_raw_buffer (uint8_t *buf, uint32_t len)
+{
+    int i = 0;
+
+    for (i = 0; i < len; i++) {
+        if (i && i % 4 == 0) {
+            printf(" ");
+        }
+        if (i && i % 16 == 0) {
+            printf("\n");
+        }
+        printf("%02x", buf[i]);
+    }
+    printf("\n");
+    return 0;
+}
+
+int
 start_receiver ()
 {
     int count = 0;
@@ -103,15 +121,19 @@ start_receiver ()
 
     while (1) {
         bzero(buffer, sizeof(buffer));
-        //count = recvmmsg(glinfo.fd, &glinfo.mmsgs[0], MAX_NUM_PKTS, 0, NULL);
-        count = recv(glinfo.fd, buffer, 1500, 0);
+        count = recvmmsg(glinfo.fd, &glinfo.mmsgs[0], MAX_NUM_PKTS, MSG_DONTWAIT, NULL);
+        //count = recv(glinfo.fd, buffer, 1500, 0);
         //count = recvfrom(glinfo.fd, buffer, 1500, 0, NULL, NULL);
         if (count < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+                continue;
+            }
             perror("recvmmsg");
             exit(1);
         }
 
         LOG_INFO("Received %d packets.", count);
+        //print_raw_buffer(buffer, count);
         continue;
         for (int i = 0; i < count; i++) {
             struct mmsghdr *msg = &glinfo.mmsgs[i];

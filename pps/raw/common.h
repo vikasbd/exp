@@ -1,4 +1,6 @@
 #define _GNU_SOURCE // sendmmsg
+
+#include <errno.h>
 #include <arpa/inet.h>
 #include <linux/if_packet.h>
 #include <stdio.h>
