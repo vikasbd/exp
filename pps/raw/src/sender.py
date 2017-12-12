@@ -1,4 +1,6 @@
 #! /usr/bin/python
+import socket
+import sys
 
 from subprocess import Popen, PIPE
 import src.generator as generator
@@ -13,11 +15,16 @@ class RawperfSender:
         return
 
     def __connect(self):
-        print("Connecting for Receiver.....",)
-        self.sock.connect((self.options.dip, self.options.ctrlport))
-        print("Done")
+        print "Connecting for Receiver.....",
+        sys.stdout.flush()
+        try:
+            self.sock.connect((self.options.dip, self.options.ctrlport))
+        except:
+            print "Failed."
+            print "Error: Receiver not ready."
+            sys.exit(1)
+        print "Connected"
         mesg = self.sock.recv(128)
-        print(mesg)
         return
 
     def __generate(self):
