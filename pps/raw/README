@@ -1,0 +1,15 @@
+1) Install the required packages.
+----------------------------------
+Run 'setup.sh'
+
+2) Start Receiver:
+---------------------
+sudo taskset -c 1 ./rawperf.py --receiver --intf ens5
+
+3) Start Sender:
+----------------------
+Example:
+sudo ./rawperf.py --sender --intf ens5 --sip 172.31.4.106 --dip 172.31.13.221 --dmac 0a:5f:8b:a5:44:dc
+sudo ./rawperf.py --sender --intf ens5 --sip 172.31.4.106 --dip 172.31.13.221 --dmac 0a:5f:8b:a5:44:dc --tcp
+
+Use --size option to change the packet sizes.
