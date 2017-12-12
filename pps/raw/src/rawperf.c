@@ -185,7 +185,7 @@ print_stats ()
 
     printf("Runtime         : %ld seconds\n", total_time);
     printf("Total Packets   : %ld @ %d Kpps\n",
-           glinfo.total_pkts, pps);
+           glinfo.total_pkts, pps / 1024);
     printf("Total Bytes     : %lld @ %lld Mbps\n",
            glinfo.total_bytes, bw/1024/1024);
 }
