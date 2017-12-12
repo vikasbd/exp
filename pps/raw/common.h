@@ -12,7 +12,7 @@
 #include <pcap/pcap.h>
 
 #define MAX_PKT_SIZE    9000
-#define MAX_NUM_PKTS    4096
+#define MAX_NUM_PKTS    1024
 
 typedef enum {
     LOG_LEVEL_NONE,
@@ -96,7 +96,9 @@ extern global_info_t       glinfo;
 #define IS_RUNMODE_SENDER()\
         (glopts.runmode == RUNMODE_SENDER)
 #define IS_RUNMODE_RECEIVER()\
-        (glopts.runmode = RUNMODE_RECEIVER)
+        (glopts.runmode == RUNMODE_RECEIVER)
+#define IS_RUNMODE_NONE()\
+        (glopts.runmode == RUNMODE_NONE)
 
 int
 parse_args (int argc, char *argv[]);

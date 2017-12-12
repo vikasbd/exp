@@ -1,10 +1,8 @@
-all: sender receiver
+all: rawperf
 
 CFLAGS := -g
 LIBS := -lpcap
 
-sender:
-	gcc $(CFLAGS) common.c sender.c $(LIBS) -o sender
+rawperf: common.c rawperf.c
+	gcc $(CFLAGS) common.c rawperf.c $(LIBS) -o rawperf
 
-receiver:
-	gcc $(CFLAGS) common.c receiver.c $(LIBS) -o receiver

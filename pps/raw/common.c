@@ -15,15 +15,9 @@ mac2str (mac_addr_t mac)
 }
 
 int
-print_usage ()
-{
-    printf("Usage: ./sender [-d] [-v] -i <ifname> -f <pcapfile>\n");
-}
-
-int
 print_help ()
 {
-    print_usage();
+    printf("Usage: ./rawperf <options>\n");
     printf("Options:\n");
     printf(" -d             : Enable Debugs\n");
     printf(" -v             : Enable Verbose\n");
@@ -65,19 +59,27 @@ parse_args (int argc, char *argv[])
                 exit(0);
             default:
                 printf("Invalid Option: %c\n", c);
-                print_usage();
+                print_help();
                 exit(1);
                 break;
         }
     }
 
-    if (glopts.ifname == NULL ||
-        glopts.pcapfile == NULL) {
-        print_usage();
-        exit(1);
+    if (glopts.ifname == NULL) {
+        printf("Error: Interface not specified.\n\n");
+        goto error_exit;
+    }
+
+    if (IS_RUNMODE_NONE()) {
+        printf("Error: Sender or Receiver not specified.\n\n");
+        goto error_exit;
     }
 
     return 0;
+
+error_exit:
+    print_help();
+    exit(1);
 }
 
 int
