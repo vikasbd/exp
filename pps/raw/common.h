@@ -12,9 +12,13 @@
 #include <netinet/ether.h>
 #include <unistd.h>
 #include <pcap/pcap.h>
+#include <time.h>
 
 #define MAX_PKT_SIZE    9000
 #define MAX_NUM_PKTS    1024
+
+#define TRUE    1
+#define FALSE   0
 
 typedef enum {
     LOG_LEVEL_NONE,
@@ -67,6 +71,11 @@ typedef struct global_info_s {
     struct iovec        iovecs[MAX_NUM_PKTS];
     struct mmsghdr      mmsgs[MAX_NUM_PKTS];
 
+    struct timespec     beg_tspec;
+    struct timespec     end_tspec;
+    
+    long                total_pkts;
+    long long           total_bytes;
 } global_info_t;
 extern global_info_t       glinfo;
 

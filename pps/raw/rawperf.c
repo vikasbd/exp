@@ -76,6 +76,18 @@ init_sender_iovecs ()
     return 0;
 }
 
+int
+is_timeout ()
+{
+    clock_gettime(CLOCK_REALTIME, &glinfo.end_tspec);
+    
+    time_t total_time = glinfo.end_tspec.tv_sec - glinfo.beg_tspec.tv_sec;
+    if (total_time > 10) {
+        return TRUE;
+    }
+
+    return FALSE;
+}
 
 int
 start_sender ()
@@ -85,11 +97,19 @@ start_sender ()
     init_sender_iovecs();
 
     while (1) {
-        if (sendmmsg(glinfo.fd, glinfo.mmsgs, glinfo.num_pkts, 0) < 0) {
+        int count = sendmmsg(glinfo.fd, glinfo.mmsgs, glinfo.num_pkts, 0);
+        if (count < 0) {
             perror("sendmmsg");
             exit(1);
         }
         LOG_DEBUG("Packets sent successfully.");
+        
+        glinfo.total_pkts += count;
+        glinfo.total_bytes += (count * glinfo.pktinfo[0].len); 
+
+        if (is_timeout()) {
+            return 0;
+        }
     }
 
     return 0;
@@ -142,6 +162,10 @@ start_receiver ()
             msg->msg_len = 0;
             LOG_INFO(" - Packet#%d: Length:%d", i, len);
         }
+
+        if (is_timeout()) {
+            return 0;
+        }
     }
 
     LOG_INFO("Packets sent successfully.");
@@ -149,13 +173,24 @@ start_receiver ()
 }
 
 int
-main (int argc, char *argv[])
+print_stats ()
 {
-    int     ret = 0;
+    time_t total_time = glinfo.end_tspec.tv_sec - glinfo.beg_tspec.tv_sec;
+    
+    int pps = glinfo.total_pkts / total_time;
+    long long bw = glinfo.total_bytes / total_time * 8;
 
-    parse_args(argc, argv);
+    printf("Runtime             : %ld seconds\n", total_time);
+    printf("Total Packets Sent  : %ld @ %d Kpps\n",
+           glinfo.total_pkts, pps);
+    printf("Total Bytes Sent    : %lld @ %lld Mbps\n",
+           glinfo.total_bytes, bw/1024/1024);
+}
 
-    init_glinfo();
+int
+start_tests ()
+{
+    clock_gettime(CLOCK_REALTIME, &glinfo.beg_tspec);
 
     if (IS_RUNMODE_SENDER()) {
         start_sender();
@@ -164,6 +199,23 @@ main (int argc, char *argv[])
     } else {
         LOG_ERROR("Sender or Receiver not specified.");
     }
+
+    print_stats();
+
+    return 0;
+}
+
+
+int
+main (int argc, char *argv[])
+{
+    int                 ret = 0;
+    
+    parse_args(argc, argv);
+    
+    init_glinfo();
+
+    start_tests();
 
     return 0;
 }
