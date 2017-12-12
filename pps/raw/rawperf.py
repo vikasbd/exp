@@ -13,9 +13,9 @@ parser.add_argument('--dip', dest='dip',
 parser.add_argument('--dmac', dest='dmac',
                     default='00:01:02:03:04:05', help='DstMac')
 parser.add_argument('--sport', dest='sport',
-                    default=1234, help='SrcPort')
+                    default=40001, help='SrcPort')
 parser.add_argument('--dport', dest='dport',
-                    default=5678, help='DstPort')
+                    default=50001, help='DstPort')
 parser.add_argument('--ctrlport', dest='ctrlport',
                     default=5000, help='Control Port')
 parser.add_argument('--size', dest='size', 
@@ -28,6 +28,8 @@ parser.add_argument('--sender', dest='sender',
                     action='store_true', help='Run in sender mode.')
 parser.add_argument('--receiver', dest='receiver', 
                     action='store_true', help='Run in receiver mode.')
+parser.add_argument('--nflows', dest='nflows',
+                    default=16, help='Number of Flows')
 
 GlobalOptions = parser.parse_args()
 GlobalOptions.sport = int(GlobalOptions.sport)
