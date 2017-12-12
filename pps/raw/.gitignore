@@ -1,3 +1,4 @@
 pkt.txt
 pkt.pcap
 rawperf
+*.pyc

@@ -1,21 +1,7 @@
 #! /usr/bin/python
 import argparse
-import generator
-
-from subprocess import Popen, PIPE
-
-def StartRawperf():
-    pargs = ['./bin/rawperf', '-i', GlobalOptions.intf]
-    if GlobalOptions.sender:
-        pargs.append('-s')
-        pargs.append('-f')
-        pargs.append('pkt.pcap')
-    else:
-        pargs.append('-r')
-
-    proc = Popen(pargs)
-    proc.communicate()
-
+import src.sender as sender
+import src.receiver as receiver
 
 parser = argparse.ArgumentParser(description='Generate Packets')
 parser.add_argument('--intf', dest='intf',
@@ -30,6 +16,8 @@ parser.add_argument('--sport', dest='sport',
                     default=1234, help='SrcPort')
 parser.add_argument('--dport', dest='dport',
                     default=5678, help='DstPort')
+parser.add_argument('--ctrlport', dest='ctrlport',
+                    default=5000, help='Control Port')
 parser.add_argument('--size', dest='size', 
                     default=64, help='Packet Size')
 parser.add_argument('--pcap', dest='pcap', 
@@ -44,11 +32,12 @@ parser.add_argument('--receiver', dest='receiver',
 GlobalOptions = parser.parse_args()
 GlobalOptions.sport = int(GlobalOptions.sport)
 GlobalOptions.dport = int(GlobalOptions.dport)
+GlobalOptions.ctrlport = int(GlobalOptions.ctrlport)
 GlobalOptions.size = int(GlobalOptions.size)
 
-gen = generator.PacketGenerator(GlobalOptions)
-gen.Generate()
+if GlobalOptions.sender:
+    tester = sender.RawperfSender(GlobalOptions)
+else:
+    tester = receiver.RawperfReceiver(GlobalOptions)
 
-StartRawperf()
-
-gen.Cleanup()
+tester.Start()

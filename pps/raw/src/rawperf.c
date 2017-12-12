@@ -137,32 +137,35 @@ int
 start_receiver ()
 {
     int count = 0;
-    uint8_t buffer[4096];
+    //uint8_t buffer[4096];
 
     while (1) {
-        bzero(buffer, sizeof(buffer));
+        //bzero(buffer, sizeof(buffer));
         count = recvmmsg(glinfo.fd, &glinfo.mmsgs[0], MAX_NUM_PKTS, MSG_DONTWAIT, NULL);
+        //count = recvmmsg(glinfo.fd, &glinfo.mmsgs[0], 32, 0, NULL);
         //count = recv(glinfo.fd, buffer, 1500, 0);
         //count = recvfrom(glinfo.fd, buffer, 1500, 0, NULL, NULL);
         if (count < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
-                continue;
+                goto check_timeout;
             }
             perror("recvmmsg");
             exit(1);
         }
 
-        LOG_INFO("Received %d packets.", count);
+        LOG_DEBUG("Received %d packets.", count);
         //print_raw_buffer(buffer, count);
-        continue;
         for (int i = 0; i < count; i++) {
-            struct mmsghdr *msg = &glinfo.mmsgs[i];
-            int len = msg->msg_len;
-            msg->msg_hdr.msg_flags = 0;
-            msg->msg_len = 0;
-            LOG_INFO(" - Packet#%d: Length:%d", i, len);
+            LOG_DEBUG(" - Packet#%d: Length:%d", i, glinfo.mmsgs[i].msg_len);
+            glinfo.total_bytes += glinfo.mmsgs[i].msg_len;
+
+            glinfo.mmsgs[i].msg_hdr.msg_flags = 0;
+            glinfo.mmsgs[i].msg_len = 0;
         }
 
+        glinfo.total_pkts += count;
+
+check_timeout:
         if (is_timeout()) {
             return 0;
         }
@@ -180,10 +183,10 @@ print_stats ()
     int pps = glinfo.total_pkts / total_time;
     long long bw = glinfo.total_bytes / total_time * 8;
 
-    printf("Runtime             : %ld seconds\n", total_time);
-    printf("Total Packets Sent  : %ld @ %d Kpps\n",
+    printf("Runtime         : %ld seconds\n", total_time);
+    printf("Total Packets   : %ld @ %d Kpps\n",
            glinfo.total_pkts, pps);
-    printf("Total Bytes Sent    : %lld @ %lld Mbps\n",
+    printf("Total Bytes     : %lld @ %lld Mbps\n",
            glinfo.total_bytes, bw/1024/1024);
 }
 

@@ -1,11 +1,13 @@
 all: rawperf
 
+SRCS := src/common.c src/rawperf.c
+
 CFLAGS := -g
 LIBS := -lpcap
 
-rawperf: common.c rawperf.c
+rawperf: $(SRCS)
 	mkdir -p bin
-	gcc $(CFLAGS) common.c rawperf.c $(LIBS) -o bin/rawperf
+	gcc $(CFLAGS) $(SRCS) $(LIBS) -o bin/rawperf
 
 clean:
 	rm -f bin/rawperf
