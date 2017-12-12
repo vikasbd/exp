@@ -9,7 +9,11 @@ class RawperfReceiver:
     def __init__(self, options):
         self.options = options
         self.pargs = pargs = ['./bin/rawperf', '-r', '-i', options.intf ]
+        return
+
+    def __setup(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return
 
     def __run(self):
@@ -28,6 +32,7 @@ class RawperfReceiver:
         return
 
     def Start(self):
+        self.__setup()
         self.__listen()
         self.__run()
         return
