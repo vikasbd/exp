@@ -114,10 +114,14 @@ init_mmsg ()
 
     return 0;
 }
+
 int
 init_glinfo ()
 {
     struct ifreq    req;
+    int cursize = 0;
+    int size = sizeof(cursize);
+    int newsize = 0;
 
     bzero(&glinfo, sizeof(glinfo));
     
@@ -127,7 +131,11 @@ init_glinfo ()
     }
 
     // Open RAW socket to send on
-    glinfo.fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
+    if (IS_RUNMODE_SENDER()) {
+        glinfo.fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
+    } else {
+        glinfo.fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    }
     if (glinfo.fd == -1) {
         LOG_ERROR("Unable to open Raw Socket.");
         exit(1);
@@ -153,6 +161,56 @@ init_glinfo ()
     maccpy(glinfo.srcmac.ether_addr_octet,
            ((uint8_t *)&req.ifr_hwaddr.sa_data));
     LOG_INFO("Interface Source MAC = %s", mac2str(glinfo.srcmac));
+
+    if (IS_RUNMODE_SENDER()) {
+        // Set SNDBUF size
+        if (getsockopt(glinfo.fd, SOL_SOCKET, SO_SNDBUF, &cursize, &size) < 0) {
+            perror("SNDBUF");
+            exit(1);
+        }
+        LOG_DEBUG("Current SO_SNDBUF size = %d", cursize);
+
+        newsize = cursize * 2;
+        if (setsockopt(glinfo.fd, SOL_SOCKET, SO_SNDBUF, &newsize, sizeof(size)) < 0) {
+            perror("RCVBUF");
+            exit(1);
+        }
+    }
+
+    if (IS_RUNMODE_RECEIVER()) {
+        // Set the interface in promiscuous mode.
+        bzero(&req, sizeof(req));
+        strncpy(req.ifr_name, glopts.ifname, IFNAMSIZ - 1);
+        if (ioctl(glinfo.fd, SIOCGIFFLAGS, &req) < 0) {
+            perror("SIOCGIFFLAGS");
+            exit(1);
+        }
+        //req.ifr_flags |= IFF_PROMISC;
+        if (ioctl(glinfo.fd, SIOCGIFFLAGS, &req) < 0) {
+            perror("SIOCGIFFLAGS - Promiscuous");
+            exit(1);
+        }
+
+        // Bind interface
+        if (setsockopt(glinfo.fd, SOL_SOCKET, SO_BINDTODEVICE,
+                       glopts.ifname, IFNAMSIZ - 1) == -1)    {
+            perror("SO_BINDTODEVICE");
+            close(glinfo.fd);
+            exit(1);
+        }
+
+        if (getsockopt(glinfo.fd, SOL_SOCKET, SO_RCVBUF, &cursize, &size) < 0) {
+            perror("SNDBUF");
+            exit(1);
+        }
+        LOG_DEBUG("Current SO_RCVBUF size = %d", cursize);
+
+        newsize = cursize * 2;
+        if (setsockopt(glinfo.fd, SOL_SOCKET, SO_RCVBUF, &newsize, sizeof(size)) < 0) {
+            perror("RCVBUF");
+            exit(1);
+        }
+    }
 
     init_iovec();
     init_mmsg();

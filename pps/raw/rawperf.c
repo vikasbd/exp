@@ -78,7 +78,7 @@ init_sender_iovecs ()
 
 
 int
-send_packets ()
+start_sender ()
 {
     read_data_file();
     prepare_message();
@@ -96,20 +96,28 @@ send_packets ()
 }
 
 int
-recv_packets ()
+start_receiver ()
 {
     int count = 0;
+    uint8_t buffer[4096];
+
     while (1) {
-        count = recvmmsg(glinfo.fd, glinfo.mmsgs, glinfo.num_pkts, 0, NULL);
+        bzero(buffer, sizeof(buffer));
+        //count = recvmmsg(glinfo.fd, &glinfo.mmsgs[0], MAX_NUM_PKTS, 0, NULL);
+        count = recv(glinfo.fd, buffer, 1500, 0);
+        //count = recvfrom(glinfo.fd, buffer, 1500, 0, NULL, NULL);
         if (count < 0) {
             perror("recvmmsg");
             exit(1);
         }
 
-        LOG_DEBUG("Received %d packets.", count);
+        LOG_INFO("Received %d packets.", count);
+        continue;
         for (int i = 0; i < count; i++) {
             struct mmsghdr *msg = &glinfo.mmsgs[i];
             int len = msg->msg_len;
+            msg->msg_hdr.msg_flags = 0;
+            msg->msg_len = 0;
             LOG_INFO(" - Packet#%d: Length:%d", i, len);
         }
     }
@@ -128,9 +136,9 @@ main (int argc, char *argv[])
     init_glinfo();
 
     if (IS_RUNMODE_SENDER()) {
-        send_packets();
+        start_sender();
     } else if (IS_RUNMODE_RECEIVER()) {
-        recv_packets();
+        start_receiver();
     } else {
         LOG_ERROR("Sender or Receiver not specified.");
     }
