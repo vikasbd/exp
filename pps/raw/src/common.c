@@ -125,7 +125,7 @@ init_glinfo ()
 
     bzero(&glinfo, sizeof(glinfo));
     
-    glinfo.loglevel = LOG_LEVEL_INFO;
+    glinfo.loglevel = LOG_LEVEL_ERROR;
     if (glopts.loglevel != LOG_LEVEL_NONE) {
         glinfo.loglevel = glopts.loglevel;
     }

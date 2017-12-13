@@ -15,8 +15,6 @@ parser.add_argument('--ctrlport', dest='ctrlport',
                     default=5000, help='Control Port')
 parser.add_argument('--size', dest='size', 
                     default=64, help='Packet Size')
-parser.add_argument('--pcap', dest='pcap', 
-                    default='pkt.pcap', help='Pcap file to be written')
 parser.add_argument('--tcp', dest='tcp', 
                     action='store_true', help='TCP')
 parser.add_argument('--sender', dest='sender', 
@@ -25,12 +23,19 @@ parser.add_argument('--receiver', dest='receiver',
                     action='store_true', help='Run in receiver mode.')
 parser.add_argument('--nflows', dest='nflows',
                     default=16, help='Number of Flows')
+parser.add_argument('--threads', dest='threads',
+                    default=2, help='Number of Flows')
+parser.add_argument('--noreceiver', dest='noreceiver',
+                    action='store_true', help='No Receiver mode.')
+
 
 GlobalOptions = parser.parse_args()
 GlobalOptions.sport = int(GlobalOptions.sport)
 GlobalOptions.dport = int(GlobalOptions.dport)
 GlobalOptions.ctrlport = int(GlobalOptions.ctrlport)
 GlobalOptions.size = int(GlobalOptions.size)
+GlobalOptions.threads = int(GlobalOptions.threads)
+GlobalOptions.nflows = int(GlobalOptions.nflows)
 
 error = False
 if GlobalOptions.sender is False and GlobalOptions.receiver is False:

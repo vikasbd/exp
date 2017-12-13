@@ -7,9 +7,11 @@ class PacketGenerator():
     def __init__(self, options):
         self.options = options
         self.pkts = []
+        self.pcaps = []
         return
 
-    def Generate(self):
+    def __generate(self, thread_id):
+        thread_pkts = []
         for nf in range(self.options.nflows):
             pkt = Ether()/IP()
             pkt[Ether].dst = self.options.dmac
@@ -21,8 +23,10 @@ class PacketGenerator():
                 l4.flags = 'A'
             else:
                 l4 = UDP()
-            l4.sport = self.options.sport + nf
-            l4.dport = self.options.dport + nf
+            l4.sport = self.options.sport +\
+                       thread_id * self.options.nflows + nf
+            l4.dport = self.options.dport +\
+                       thread_id * self.options.nflows + nf
 
             pkt = pkt / l4 
 
@@ -31,10 +35,22 @@ class PacketGenerator():
             pkt = pkt / Raw(bytes('\xC0\x01\xD0\x0D'))
             #pkt.show2()
             #hexdump(pkt)
-            self.pkts.append(pkt)
+            thread_pkts.append(pkt)
 
-        wrpcap(self.options.pcap, self.pkts)
+        self.pkts.append(thread_pkts)
+        pcapfile = self.GetPcapFile(thread_id)
+        wrpcap(pcapfile, thread_pkts)
 
     def Cleanup(self):
-        os.remove(self.options.pcap)
+        for p in self.pcaps:
+            os.remove(p)
+        return
+
+    def GetPcapFile(self, thread_id):
+        return self.pcaps[thread_id]
+
+    def Generate(self):
+        for t in range(self.options.threads):
+            self.pcaps.append('thr%d.pcap' % t)
+            self.__generate(t)
         return

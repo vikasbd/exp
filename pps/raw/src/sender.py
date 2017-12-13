@@ -9,9 +9,6 @@ class RawperfSender:
     def __init__(self, options):
         self.options = options
         self.__validate_options()
-        self.pargs = pargs = ['./bin/rawperf', '-s',
-                              '-i', self.options.intf,
-                              '-f', 'pkt.pcap']
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         return
 
@@ -31,6 +28,9 @@ class RawperfSender:
         return
 
     def __connect(self):
+        if self.options.noreceiver:
+            return
+
         print "Connecting for Receiver.....",
         sys.stdout.flush()
         try:
@@ -49,8 +49,12 @@ class RawperfSender:
         return
 
     def __run(self):
-        proc = Popen(self.pargs)
-        proc.communicate()
+        for t in range(self.options.threads):
+            pargs = [ './bin/rawperf', '-s', '-i', self.options.intf, '-f' ]
+            pargs.append(self.gen.GetPcapFile(t))
+            print "Starting Sending thread: %d" % t
+            proc = Popen(pargs)
+        proc.wait()
         return
 
     def __cleanup(self):
