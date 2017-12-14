@@ -43,6 +43,21 @@ class RawperfSender:
         mesg = self.sock.recv(128)
         return
 
+    def __connect_data_ports(self):
+        if self.options.tcp is False:
+            return
+
+        self.dsocks = []
+        for t in range(self.options.threads):
+            for f in range(self.options.nflows):
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                port = glopts.CalculateDstPort(t,f)
+                sock.connect((self.options.dip, port))
+                print "Connected on port: ", port
+                self.dsocks.append(sock)
+        return
+
+
     def __generate(self):
         self.gen = generator.PacketGenerator(self.options)
         self.gen.Generate()
@@ -64,6 +79,7 @@ class RawperfSender:
     def Start(self):
         self.__generate()
         self.__connect()
+        self.__connect_data_ports()
         self.__run()
         self.__cleanup()
         return

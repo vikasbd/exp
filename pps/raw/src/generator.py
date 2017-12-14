@@ -3,6 +3,8 @@ import os
 from scapy import *
 from scapy.all import *
 
+import glopts as glopts
+
 class PacketGenerator():
     def __init__(self, options):
         self.options = options
@@ -19,15 +21,11 @@ class PacketGenerator():
             pkt[IP].dst = self.options.dip
 
             if self.options.tcp:
-                l4 = TCP()
-                l4.flags = 'A'
+                l4 = TCP(flags='A')
             else:
                 l4 = UDP()
-            l4.sport = self.options.sport +\
-                       thread_id * self.options.nflows + nf
-            l4.dport = self.options.dport +\
-                       thread_id * self.options.nflows + nf
-
+            l4.sport = glopts.CalculateSrcPort(thread_id, nf)
+            l4.dport = glopts.CalculateDstPort(thread_id, nf)
             pkt = pkt / l4 
 
             payload_size = self.options.size - len(pkt) - 4

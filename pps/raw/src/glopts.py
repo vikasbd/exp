@@ -24,7 +24,7 @@ parser.add_argument('--receiver', dest='receiver',
 parser.add_argument('--nflows', dest='nflows',
                     default=16, help='Number of Flows')
 parser.add_argument('--threads', dest='threads',
-                    default=2, help='Number of Flows')
+                    default=1, help='Number of Flows')
 parser.add_argument('--noreceiver', dest='noreceiver',
                     action='store_true', help='No Receiver mode.')
 
@@ -47,3 +47,11 @@ if GlobalOptions.intf is None:
 
 if error is True:
     sys.exit(1)
+
+def CalculateSrcPort(thread_id, flow_id):
+    return GlobalOptions.sport +\
+           thread_id * GlobalOptions.nflows + flow_id
+
+def CalculateDstPort(thread_id, flow_id):
+    return GlobalOptions.sport +\
+           thread_id * GlobalOptions.nflows + flow_id
