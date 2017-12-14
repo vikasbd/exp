@@ -4,6 +4,7 @@ import sys
 
 from subprocess import Popen, PIPE
 import src.generator as generator
+import src.glopts as glopts
 
 class RawperfSender:
     def __init__(self, options):
@@ -52,6 +53,7 @@ class RawperfSender:
             for f in range(self.options.nflows):
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 port = glopts.CalculateDstPort(t,f)
+                sock.bind((self.options.sip, port))
                 sock.connect((self.options.dip, port))
                 print "Connected on port: ", port
                 self.dsocks.append(sock)
