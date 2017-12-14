@@ -30,16 +30,17 @@ class RawperfReceiver:
         for t in range(self.options.threads):
             for f in range(self.options.nflows):
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 port = glopts.CalculateDstPort(t,f)
+                print "Listening on port: ", port
                 sock.bind(('0.0.0.0', port))
                 sock.listen(1)
-                print "Listening on port: ", port
                 self.dsocks.append(sock)
         return
 
     def __accept_data_connections(self):
         for sock in self.dsocks:
-            conn, addr = self.sock.accept()
+            conn, addr = sock.accept()
             print "Accepted data connection from: ", addr
         return
 
