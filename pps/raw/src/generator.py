@@ -1,5 +1,5 @@
 #! /usr/bin/python
-
+import os
 from scapy import *
 from scapy.all import *
 
@@ -51,6 +51,6 @@ class PacketGenerator():
 
     def Generate(self):
         for t in range(self.options.threads):
-            self.pcaps.append('thr%d.pcap' % t)
+            self.pcaps.append('proc%d_thr%d.pcap' % (os.getpid(), t))
             self.__generate(t)
         return
