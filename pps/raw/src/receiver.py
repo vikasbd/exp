@@ -39,6 +39,8 @@ class RawperfReceiver:
         return
 
     def __accept_data_connections(self):
+        if self.options.tcp is False:
+            return
         for sock in self.dsocks:
             conn, addr = sock.accept()
             print "Accepted data connection from: ", addr
