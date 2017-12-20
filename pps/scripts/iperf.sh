@@ -40,7 +40,7 @@ if [ "$1" == "server" ]; then
 fi
 
 if [ "$1" == "client" ]; then
-    if [ "$#" -ne 6 ]; then
+    if [ "$#" -ne 4 ]; then
     echo "Usage: $0 client <num_cores> <start_core#> <server_ip>" >&2
     exit 1
     fi
