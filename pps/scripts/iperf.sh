@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [ "$PKTSIZE" == "" ]; then
+    export PKTSIZE=128
+fi
+
+if [ "$PROTO" == "" ]; then
+    export PROTO="udp"
+fi
+
+if [ "$BW" == "" ]; then
+    export PROTO="5g"
+fi
+
 if [ "$#" -eq 0 ]; then
     echo "Usage: $0 <server/client> <num_cores> <start_core#> <server_ip> <tcp/udp> <pktsize>" >&2
     exit 1
@@ -39,10 +51,10 @@ if [ "$1" == "client" ]; then
         echo "Starting client $i on CPU $core"
         let "port = 5200 + $i"
        # UDP
-		if [ "$4" == "udp" ]; then
-	    	taskset -c $core iperf3 -V -c $4 -p $port -u -t 60 -b 5g -l$5 &
-		else
-	       	taskset -c $core iperf3 -V -c $4 -p $port -t 60 -M$5 -N -l$5  &
+        if [ "$PROTO" == "udp" ]; then
+            taskset -c $core iperf3 -V -c $4 -p $port -u -t 60 -b $BW -l$PKTSIZE &
+        else
+            taskset -c $core iperf3 -V -c $4 -p $port -t 60 -M$PKTSIZE -N -l$PKTSIZE  &
         fi
     done
 fi
