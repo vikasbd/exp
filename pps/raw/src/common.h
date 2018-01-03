@@ -15,7 +15,7 @@
 #include <time.h>
 
 #define MAX_PKT_SIZE    9000
-#define MAX_NUM_PKTS    1024
+#define MAX_NUM_PKTS    4096
 
 #define TRUE    1
 #define FALSE   0

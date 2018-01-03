@@ -67,7 +67,7 @@ class RawperfSender:
 
     def __run(self):
         for t in range(self.options.threads):
-            pargs = [ './bin/rawperf', '-s', '-i', self.options.intf, '-f' ]
+            pargs = [ 'taskset', '-c', t, './bin/rawperf', '-s', '-i', self.options.intf, '-f' ]
             pargs.append(self.gen.GetPcapFile(t))
             print "Starting Sending thread: %d" % t
             proc = Popen(pargs)
