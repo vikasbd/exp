@@ -27,6 +27,12 @@ parser.add_argument('--threads', dest='threads',
                     default=1, help='Number of Flows')
 parser.add_argument('--noreceiver', dest='noreceiver',
                     action='store_true', help='No Receiver mode.')
+parser.add_argument('--duration', dest='duration',
+                    default=10, help='Duration of the test.')
+parser.add_argument('--fixdport', dest='fixdport',
+                    action='store_true', help='Fixed Dest Port')
+parser.add_argument('--fixsport', dest='fixsport',
+                    action='store_true', help='Fixed Src Port')
 
 
 GlobalOptions = parser.parse_args()
@@ -49,9 +55,13 @@ if error is True:
     sys.exit(1)
 
 def CalculateSrcPort(thread_id, flow_id):
+    if GlobalOptions.fixsport:
+        return GlobalOptions.sport
     return GlobalOptions.sport +\
            thread_id * GlobalOptions.nflows + flow_id
 
 def CalculateDstPort(thread_id, flow_id):
-    return GlobalOptions.sport +\
+    if GlobalOptions.fixdport:
+        return GlobalOptions.dport
+    return GlobalOptions.dport +\
            thread_id * GlobalOptions.nflows + flow_id
