@@ -103,8 +103,8 @@ start_sender ()
                 perror("sendmmsg");
                 exit(1);
             }
+            LOG_DEBUG("%d Packets sent successfully.", 1024);
         }
-        LOG_DEBUG("Packets sent successfully.");
         
         glinfo.total_pkts += MAX_NUM_PKTS;
         glinfo.total_bytes += (MAX_NUM_PKTS * glinfo.pktinfo[0].len); 
