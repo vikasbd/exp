@@ -2,7 +2,7 @@ all: rawperf
 
 SRCS := src/common.c src/rawperf.c
 
-CFLAGS := -g
+CFLAGS := -g -std=c99
 LIBS := -lpcap
 
 rawperf: $(SRCS)
