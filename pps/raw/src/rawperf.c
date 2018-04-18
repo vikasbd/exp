@@ -97,15 +97,17 @@ start_sender ()
     init_sender_iovecs();
 
     while (1) {
-        int count = sendmmsg(glinfo.fd, glinfo.mmsgs, glinfo.num_pkts, 0);
-        if (count < 0) {
-            perror("sendmmsg");
-            exit(1);
+        for (int i = 0; i < 4; i++) {
+            int count = sendmmsg(glinfo.fd, glinfo.mmsgs + i*1024, 1024, 0);
+            if (count < 0) {
+                perror("sendmmsg");
+                exit(1);
+            }
         }
         LOG_DEBUG("Packets sent successfully.");
         
-        glinfo.total_pkts += count;
-        glinfo.total_bytes += (count * glinfo.pktinfo[0].len); 
+        glinfo.total_pkts += MAX_NUM_PKTS;
+        glinfo.total_bytes += (MAX_NUM_PKTS * glinfo.pktinfo[0].len); 
 
         if (is_timeout()) {
             return 0;
