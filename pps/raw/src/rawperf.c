@@ -1,4 +1,7 @@
 #include "common.h"
+
+static int gl_test_duration;
+
 int
 add_new_packet (int index, const uint8_t *pkt, uint32_t len)
 {
@@ -80,9 +83,8 @@ int
 is_timeout ()
 {
     clock_gettime(CLOCK_REALTIME, &glinfo.end_tspec);
-    
     time_t total_time = glinfo.end_tspec.tv_sec - glinfo.beg_tspec.tv_sec;
-    if (total_time > 10) {
+    if (total_time > gl_test_duration) {
         return TRUE;
     }
 
@@ -97,13 +99,15 @@ start_sender ()
     init_sender_iovecs();
 
     while (1) {
-        for (int i = 0; i < 4; i++) {
-            int count = sendmmsg(glinfo.fd, glinfo.mmsgs + i*1024, 1024, 0);
+        for (int i = 0; i < MAX_NUM_PKTS / NUM_PKTS_PER_SEND; i++) {
+            int count = sendmmsg(glinfo.fd, 
+                                 glinfo.mmsgs + i * NUM_PKTS_PER_SEND,
+                                 NUM_PKTS_PER_SEND, 0);
             if (count < 0) {
                 perror("sendmmsg");
                 exit(1);
             }
-            LOG_DEBUG("%d Packets sent successfully.", 1024);
+            LOG_DEBUG("%d Packets sent successfully.", NUM_PKTS_PER_SEND);
         }
         
         glinfo.total_pkts += MAX_NUM_PKTS;
@@ -216,6 +220,8 @@ main (int argc, char *argv[])
 {
     int                 ret = 0;
     
+    gl_test_duration = atoi(getenv("TEST_DURATION"));
+
     parse_args(argc, argv);
     
     init_glinfo();

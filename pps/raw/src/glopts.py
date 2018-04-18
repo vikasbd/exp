@@ -1,6 +1,7 @@
 #! /usr/bin/python
 import argparse
 import sys
+import os
 
 parser = argparse.ArgumentParser(description='Generate Packets')
 parser.add_argument('--intf', dest='intf', default=None, help='Interface')
@@ -33,6 +34,8 @@ parser.add_argument('--fixdport', dest='fixdport',
                     action='store_true', help='Fixed Dest Port')
 parser.add_argument('--fixsport', dest='fixsport',
                     action='store_true', help='Fixed Src Port')
+parser.add_argument('--loglevel', dest='loglevel',
+                    default=10, help='Logging level.')
 
 
 GlobalOptions = parser.parse_args()
@@ -42,6 +45,8 @@ GlobalOptions.ctrlport = int(GlobalOptions.ctrlport)
 GlobalOptions.size = int(GlobalOptions.size)
 GlobalOptions.threads = int(GlobalOptions.threads)
 GlobalOptions.nflows = int(GlobalOptions.nflows)
+GlobalOptions.duration = int(GlobalOptions.duration)
+os.environ["TEST_DURATION"] = str(GlobalOptions.duration)
 
 error = False
 if GlobalOptions.sender is False and GlobalOptions.receiver is False:
